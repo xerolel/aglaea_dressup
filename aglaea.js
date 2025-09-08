@@ -61,5 +61,45 @@ function draw() {
 
 function drawCharacter() {
     image(bodyImg, width/2, height/2);
+    image(dresses[currentDressIndex], width/2, height/2);
+    image(hairs[currentHairIndex], width/2, height/2);
+    image(hats[currentHatIndex], width/2, height/2);
+    image(shoes[currentShoeIndex], width/2, height/2);
 }
 
+function drawArrows() {
+    image(arrowImg, leftArrowX, arrowY); // left
+    push();
+    translate(rightArrowX, arrowY);
+    scale(-1, 1); // flip for right arrow
+    image(arrowImg, 0, 0);
+    pop();
+}
+
+function drawDialogue() {
+    fill(0);
+    textSize(20);
+    textAlign(CENTER);
+    text(currentDialogue, width/2, 800);
+}
+
+function mousePressed() {
+    // left arrow click
+    if (dis(mouseX, mouseY, leftArrowX, arrowY) < 50) {
+        cycleLeft();
+    }
+    // right arrow click
+    if (dis(mouseX, mouseY, rightArrowX, arrowY) < 50) {
+        cycleRight();
+    }
+}
+
+function cycleLeft() {
+    currentDressIndex = (currentDressIndex - 1 + dresses.length) % dresses.length;
+    updateDialogue();
+}
+
+function cycleRight() {
+    currentDressIndex = (currentDressIndex + 1) % dresses.length;
+    updateDialogue();
+}
