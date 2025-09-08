@@ -103,3 +103,10 @@ function cycleRight() {
     currentDressIndex = (currentDressIndex + 1) % dresses.length;
     updateDialogue();
 }
+
+function updateDialogue() {
+    clickCount++;
+    if (clickCount % 3 === 0) { // shows dialogue every 3 clicks
+        currentDialogue = random(dialogues);
+    }
+}
