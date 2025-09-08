@@ -1,17 +1,65 @@
 let bgImg;
+let arrowImg;
+let bodyImg;
+let dresses = [];
+let hairs = [];
+let hats = [];
+let shoes = [];
+
+let currentDressIndex;
+let currentHairIndex;
+let currentHatIndex;
+let currentShoeIndex;
+
+// arrow positions
+let leftArrowX = 100, rightArrowX = 600, arrowY = 450;
+
+// dialogue
+let clickCount = 0;
+let dialogue = [
+    "No need for tailoring.",
+    "The fit on this one... is rather lovely.",
+    "What other styles do you have in mind?",
+];
+let currentDialogue = "";
 
 function preload() {
-  bgImg = loadImage("background.png");
+    bgImg = loadImage("background.png");
+    arrowImg = loadImage("arrow.png");
+    bodyImg = loadImage("body.png");
+
+    dresses.push(loadImage("dress1.png"));
+    dresses.push(loadImage("dress2.png"));
+    dresses.push(loadImage("dress3.png"));
+    dresses.push(loadImage("dress4.png"));
+
+    hairs.push(loadImage("hair1.png"));
+    hairs.push(loadImage("hair2.png"));
+    hairs.push(loadImage("hair3.png"));
+
+    shoes.push(loadImage("shoe1.png"));
+    shoes.push(loadImage("shoe2.png"));
+    shoes.push(loadImage("shoe3.png"));
+    shoes.push(loadImage("shoe4.png"));
+
+    hats.push(loadImage("hat1.png"));
+    hats.push(loadImage("hat2.png"));
+    hats.push(loadImage("hat3.png"));
 }
 
 function setup() {
-  createCanvas(700, 900);
-  imageMode(CENTER);
+    createCanvas(700, 900);
+    ImageMode(CENTER);
 }
 
 function draw() {
-  if (bgImg) {
-    image(bgImg, width/2, height/2, 700, 900); // scale to canvas
-  }
+    background(bgImg);
+    drawCharacter();
+    drawArrows();
+    drawDialogue();
+}
+
+function drawCharacter() {
+    image(bodyImg, width/2, height/2);
 }
 
