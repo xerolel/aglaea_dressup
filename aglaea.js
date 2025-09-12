@@ -1,13 +1,21 @@
 let bgImg, arrowImg, bodyImg;
 let dresses = [], hairs = [], hats = [], shoes = [];
-let clickCount = 0;
+let clickSound, bgMusic;
+
+let scenes = [];
+let currentScene = 0;
+let sceneTimer = 0;
+let sceneDuration = 60; //fps
+
+
+let gameState = "scenes";
+let fadeAlpha = 0;
 
 // default selection
 let currentShoeIndex = 0;
 let currentHatIndex = 0;
 let currentHairIndex = 0;
 let currentDressIndex = 0;
-
 
 //canvas size 
 const canvasWidth = 700;
@@ -24,17 +32,25 @@ let arrowPositions = {
     shoe: { y: 700 },
 };
 
-function preload() {
-    function loadSafe(url, label) {
-        return loadImage(url,
-            () => console.log (`${label} loaded`),
-            () => console.error(`${label} failed to load`)
-        );
+function loadSafe(url, label) {
+    return loadImage(
+        url,
+        () => console.log(`${label} loaded`),
+        () => console.error(`${label} failed to load`)
+    );
 }
+
+function preload() {
+clickSound = loadSound("click.mp3");
+bgMusic = loadSound("background.mp3");
+
 // background, arrows, and body
 bgImg = loadSafe("background.png", "Background");
 arrowImg = loadSafe("arrow.png", "Arrow");
 bodyImg = loadSafe("body.png", "Body");
+
+// scenes
+for (let s = 1; s <= 7; s++) scenes.push(loadSafe(`scene${s}.png`, `Scene${s}`));
 
 // dresses
 for (let i = 1; i <= 4; i++) dresses.push(loadSafe(`dress${i}.png`, `Dress${i}`));
@@ -43,50 +59,75 @@ for (let i = 1; i <= 4; i++) dresses.push(loadSafe(`dress${i}.png`, `Dress${i}`)
 for (let i = 1; i <= 3; i++) hairs.push(loadSafe(`hair${i}.png`, `Hair${i}`));
 
 // hats 
-for (let i = 1; i <= 3; i++) hats.push(loadSafe(`hat${i}.png`, `Hair${i}`)); 
+for (let i = 1; i <= 3; i++) hats.push(loadSafe(`hat${i}.png`, `Hat${i}`)); 
 
 // shoes
 for (let i = 1; i <= 4; i++) shoes.push(loadSafe(`shoe${i}.png`, `Shoe${i}`)); 
 }
 
+
 function setup() {
     createCanvas(canvasWidth, canvasHeight);
     imageMode(CENTER);
-    textAlign(CENTER);
-    textSize(20);
-    fill(0);
 
     for(let key in arrowPositions) {
         arrowPositions[key].leftX = 100;
         arrowPositions[key].rightX = 600;
     }
+
+    // loop bg music
+    bgMusic.loop();
+    bgMusic.setVolume(0.3);
 }
 
 function draw() {
+    background(255);
 
-    // scaling bg
-    drawScaled(bgImg);
+    if (gameState === "scenes") {
+        drawScenes();
+    } else if (gameState === "game") {
+      drawGameScreen(); }
+    }
 
-    // chara layers
-    drawCharacter();
-    
-    // draw arrows
-    drawAllArrows();
-     
-    // draw dialogue
-    drawWatermark(); // watermark
+
+
+function drawScenes() {
+    if (currentScene < scenes.length) {
+        drawScaled(scenes[currentScene]);
+        sceneTimer++;
+        if (sceneTimer >= sceneDuration) {
+            sceneTimer = 0;
+            currentScene++;
+        }
+     } else if (fadeAlpha <= 255) {
+            // fade
+            drawScaled(scenes[scenes.length - 1]);
+            fill(255, fadeAlpha);
+            rect(0,0, canvasWidth, canvasHeight);
+            fadeAlpha += 5;
+     } else {
+        gameState = "game";
+     }
+}
+
+function drawGameScreen() {
+   drawScaled(bgImg);
+   drawCharacter();
+   drawAllArrows();
+   drawWatermark();
 }
 
 // watermark
 function drawWatermark() {
-    push();
+        push();
         fill(0,0,0, 100); // transparent black
         textSize(16);
         textAlign(CENTER, CENTER);
-        text("made w/ love by nikki !", canvasWidth / 2, canvasHeight / 2);
+        text("made w/ love by nikki ! ", canvasWidth / 2, canvasHeight / 2);
         pop();
 }
 
+// character
 function drawCharacter() {
     drawScaled(bodyImg);
     drawScaled(shoes[currentShoeIndex]);
@@ -96,6 +137,7 @@ function drawCharacter() {
    
 }
 
+// scaling
 function drawScaled(img) {
     if (!img) return; // skip if missing
     // scale to fit in canvas
@@ -105,13 +147,13 @@ function drawScaled(img) {
 
 //arrows
 function drawAllArrows() {
-    if (!arrowImg) return; // skip if missing item
+    if (!arrowImg) return; // skip if missing 
     for (let key in arrowPositions) {
         let pos = arrowPositions[key];
 
         // left arrow
         image(arrowImg, pos.leftX, pos.y, arrowSize, arrowSize);
-
+    
         // right arrow (flipped)
         push();
         translate(pos.rightX, pos.y);
@@ -124,17 +166,19 @@ function drawAllArrows() {
 
 // mouse 
 function mousePressed() {
+    if (gameState !== "game") return;
+
     for (let key in arrowPositions) {
         let pos = arrowPositions[key];
 
-        // left arrow
-        if (dist(mouseX, mouseY, pos.leftX, pos.y) < arrowSize / 2) cycleCategory(key, -1);
-
-        // right arrow 
-        if (dist(mouseX, mouseY, pos.rightX, pos.y) < arrowSize / 2) cycleCategory(key, 1);
-
-        
-
+            if (dist(mouseX, mouseY, pos.leftX, pos.y) < arrowSize/2) {
+                cycleCategory(key, -1);
+                clickSound.play();
+            }
+            if (dist(mouseX, mouseY, pos.rightX, pos.y) < arrowSize/2) {
+                cycleCategory(key, 1);
+                clickSound.play();
+      }
     }
 }
 
@@ -149,19 +193,8 @@ function cycleCategory(category, direction) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 // for loops, 
-// do this thing over and over until i tell you to stop
+// do this thing over and over until i tell you to stop 
 
 // for (let i = 1; i<= 4; i++) {
 // dresses.push(loadSafe(`dress${i}.png`, `Dress${i}`));
@@ -202,4 +235,3 @@ function cycleCategory(category, direction) {
 // keep going until you reach cupcake 4 
 // after each cupcake, move to the next one
 // you frost cupcake 1, 2, 3, 4, and then u stop
-
